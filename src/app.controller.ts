@@ -1,5 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AppService } from './app.service';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileSizeValidationPipe } from './file-size-validation-pipe.pipe';
 
 @Controller()
 export class AppController {
@@ -8,5 +18,31 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+  @Post('aaa')
+  @UseInterceptors(
+    FileInterceptor('aaa', {
+      dest: 'uploads',
+    }),
+  )
+  uploadFile(
+    @UploadedFile(FileSizeValidationPipe) file: Express.Multer.File,
+    @Body() body,
+  ) {
+    console.log('body', body);
+    console.log('file', file);
+  }
+  @Post('bbb')
+  @UseInterceptors(
+    FilesInterceptor('bbb', 3, {
+      dest: 'uploads',
+    }),
+  )
+  uploadFiles(
+    @UploadedFiles(FileSizeValidationPipe) files: Array<Express.Multer.File>,
+    @Body() body,
+  ) {
+    console.log('body', body);
+    console.log('files', files);
   }
 }
